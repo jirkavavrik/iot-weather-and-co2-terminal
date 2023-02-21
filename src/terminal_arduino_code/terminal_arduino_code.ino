@@ -11,6 +11,7 @@
 #include <Adafruit_SCD30.h>
 
 #include "arduino_secrets.h"
+#include "lcd_backlight.hpp"
 const char*  server = "192.168.100.254";
 
 #include <TFT_eSPI.h>
@@ -18,6 +19,7 @@ const char*  server = "192.168.100.254";
 
 TFT_eSPI tft;
 TFT_eSprite spr = TFT_eSprite(&tft);  //sprite
+static LCDBackLight backLight;
 
 Adafruit_SCD30  scd30;
 unsigned int co2;
@@ -36,6 +38,8 @@ void setup() {
   Serial.begin(115200);
   tft.begin();
   tft.setRotation(3);
+
+  backLight.initialize();
 
   //Header
   tft.fillScreen(TFT_BLACK);
@@ -92,6 +96,8 @@ void setup() {
   mqttclient.setCallback(callback);
   delay(5000);
 
+  backLight.setBrightness(20);
+   
   Serial.println("SHT31 test");
   if (!sht.begin(0x44)) {   // Set to 0x45 for alternate i2c addr
     Serial.println("Couldn't find SHT31");
