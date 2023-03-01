@@ -61,8 +61,18 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.println();
   if(strcmp(topic, "cas") == 0) {
     for (int i=0;i<length;i++) {
-    cas[i] = (char)payload[i];
-  }
+      cas[i] = (char)payload[i];
+    }
+  } else if(strcmp(topic, "teplota") == 0) {
+    for (int i=0;i<length;i++) {
+      //implement temperature value parsing
+    }
+  } else if(strcmp(topic, "vlhkost") == 0) {
+    for (int i=0;i<length;i++) {
+    }
+  } else if(strcmp(topic, "tlak") == 0) {
+    for (int i=0;i<length;i++) {
+    }
   }
 }
 
@@ -72,7 +82,10 @@ void reconnect_mqtt() {
     Serial.print("Attempting MQTT connection...");
     if (mqttclient.connect("wioterminal")) {
       Serial.println("connected");
-      mqttclient.subscribe("cas");
+      mqttclient.subscribe("cas"); //time
+      mqttclient.subscribe("teplota"); //temperature
+      mqttclient.subscribe("vlhkost"); //humidity
+      mqttclient.subscribe("tlak"); //atm. pressure
     } else {
       Serial.print("failed, rc=");
       Serial.print(mqttclient.state());
