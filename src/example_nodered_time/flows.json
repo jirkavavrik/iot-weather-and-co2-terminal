@@ -1,0 +1,142 @@
+[
+    {
+        "id": "f1f68069ee2803d5",
+        "type": "tab",
+        "label": "Flow 3 - cas",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "a643ba69bcbf3dc1",
+        "type": "simpletime",
+        "z": "f1f68069ee2803d5",
+        "name": "",
+        "mydate": false,
+        "myymd": false,
+        "myyear": false,
+        "mymonth": false,
+        "mymonthn": false,
+        "mydom": false,
+        "mydoy": false,
+        "myday": false,
+        "myhourpm": false,
+        "myhour": false,
+        "mytime": true,
+        "mytimes": false,
+        "myminute": false,
+        "myminutes": false,
+        "mysecond": false,
+        "mymillis": false,
+        "myepoch": false,
+        "myrawdate": false,
+        "mypm": false,
+        "x": 330,
+        "y": 180,
+        "wires": [
+            [
+                "784b059dd5f5d72e"
+            ]
+        ]
+    },
+    {
+        "id": "bb063556c1a79c50",
+        "type": "mqtt out",
+        "z": "f1f68069ee2803d5",
+        "name": "",
+        "topic": "cas",
+        "qos": "2",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "d5cfb555e0d2a2d9",
+        "x": 690,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "0961cbadbd4ffd7a",
+        "type": "inject",
+        "z": "f1f68069ee2803d5",
+        "name": "",
+        "props": [],
+        "repeat": "20",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 150,
+        "y": 180,
+        "wires": [
+            [
+                "a643ba69bcbf3dc1"
+            ]
+        ]
+    },
+    {
+        "id": "784b059dd5f5d72e",
+        "type": "function",
+        "z": "f1f68069ee2803d5",
+        "name": "function 1",
+        "func": "var hodnota;\nhodnota = { payload: msg.mytime };\nreturn hodnota;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 520,
+        "y": 180,
+        "wires": [
+            [
+                "bb063556c1a79c50",
+                "4927e71694b6ded8"
+            ]
+        ]
+    },
+    {
+        "id": "4927e71694b6ded8",
+        "type": "debug",
+        "z": "f1f68069ee2803d5",
+        "name": "debug 3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 700,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "d5cfb555e0d2a2d9",
+        "type": "mqtt-broker",
+        "name": "Raspberry MQQT",
+        "broker": "raspberrypi.local",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "180",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    }
+]
