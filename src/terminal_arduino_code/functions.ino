@@ -60,18 +60,24 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
   Serial.println();
   if(strcmp(topic, "cas") == 0) {
+    memset(cas,0,sizeof(cas));
     for (int i=0;i<length;i++) {
       cas[i] = (char)payload[i];
     }
-  } else if(strcmp(topic, "teplota") == 0) {
+  } else if(strcmp(topic, "meteostanice/teplota") == 0) {
+    memset(ext_temp,0,sizeof(ext_temp));
     for (int i=0;i<length;i++) {
-      //implement temperature value parsing
+      ext_temp[i] = (char)payload[i];
     }
-  } else if(strcmp(topic, "vlhkost") == 0) {
+  } else if(strcmp(topic, "meteostanice/vlhkost") == 0) {
+    memset(ext_humidity,0,sizeof(ext_humidity));
     for (int i=0;i<length;i++) {
+      ext_humidity[i] = (char)payload[i];
     }
-  } else if(strcmp(topic, "tlak") == 0) {
+  } else if(strcmp(topic, "meteostanice/tlak") == 0) {
+    memset(ext_pressure,0,sizeof(ext_pressure));
     for (int i=0;i<length;i++) {
+      ext_pressure[i] = (char)payload[i];
     }
   }
 }
@@ -83,9 +89,9 @@ void reconnect_mqtt() {
     if (mqttclient.connect("wioterminal")) {
       Serial.println("connected");
       mqttclient.subscribe("cas"); //time
-      mqttclient.subscribe("teplota"); //temperature
-      mqttclient.subscribe("vlhkost"); //humidity
-      mqttclient.subscribe("tlak"); //atm. pressure
+      mqttclient.subscribe("meteostanice/teplota"); //temperature
+      mqttclient.subscribe("meteostanice/vlhkost"); //humidity
+      mqttclient.subscribe("meteostanice/tlak"); //atm. pressure
     } else {
       Serial.print("failed, rc=");
       Serial.print(mqttclient.state());

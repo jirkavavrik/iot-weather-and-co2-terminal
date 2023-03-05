@@ -27,7 +27,7 @@ Adafruit_SHT31 sht = Adafruit_SHT31();
 
 WiFiClient wificlient;
 PubSubClient mqttclient(wificlient);
-char cas[10];
+char cas[10], ext_temp[10], ext_humidity[10], ext_pressure[10];
 
 void connect_to_wifi();
 void reconnect_wifi();
@@ -129,6 +129,7 @@ void setup() {
 }
 
 void loop() {
+  char text_line1[18], text_line2[12];
   if (scd30.dataReady()){
     Serial.println("Data available!");
     if (!scd30.read()){ Serial.println("Error reading sensor data"); return; }
@@ -197,8 +198,14 @@ void loop() {
   spr.setFreeFont(&FreeSansBoldOblique9pt7b);
   spr.setTextColor(TFT_WHITE);
   //spr.drawNumber(t, 0, 0, 1);
-  spr.drawString("-10.23 C, 55.55 %, 1111 hPa",0,0,1);
-  spr.drawString("1111 hPa",0,22,1);
+  sprintf(text_line1,"%s%s%s%s", ext_temp, " C, ", ext_humidity, " %");
+  sprintf(text_line2,"%s%s", ext_pressure, " hPa");
+  Serial.print("text line 1: ");
+  Serial.println(text_line1);
+  Serial.print("text line 2: ");
+  Serial.println(text_line2);
+  spr.drawString(text_line1,0,0,1);
+  spr.drawString(text_line2,0,22,1);
   spr.setTextColor(TFT_GREEN);
   spr.pushSprite((tft.width() / 2) - 1, 100);
   spr.deleteSprite();
@@ -212,5 +219,5 @@ void loop() {
   spr.pushSprite(((tft.width() / 2) + (tft.width() / 2) / 2), (tft.height() / 2) + 67);
   spr.deleteSprite();
   
-  delay(14000);
+  delay(1000);
 }
