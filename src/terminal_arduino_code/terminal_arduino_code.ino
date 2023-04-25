@@ -9,17 +9,21 @@
 #include <PubSubClient.h>
 #include <rpcWiFiClientSecure.h>
 #include <Adafruit_SCD30.h>
-
+#include <SPI.h>
+#include <Seeed_FS.h>
+#include "SD/Seeed_SD.h"
+#include <string>
 #include "arduino_secrets.h"
 #include "lcd_backlight.hpp"
-const char*  server = "192.168.100.254";
-
 #include <TFT_eSPI.h>
 #include <Wire.h>
 
 TFT_eSPI tft;
 TFT_eSprite spr = TFT_eSprite(&tft);  //sprite
 static LCDBackLight backLight;
+
+File file_serveraddr;
+std::string server;
 
 Adafruit_SCD30  scd30;
 unsigned int co2;
@@ -38,7 +42,6 @@ void setup() {
   Serial.begin(115200);
   tft.begin();
   tft.setRotation(3);
-
   backLight.initialize();
 
   //Header
@@ -92,10 +95,6 @@ void setup() {
   tft.setTextColor(TFT_GREEN);
   //tft.drawString("ppm", ((tft.width() / 2) + (tft.width() / 2) / 2) + 30 , (tft.height() / 2) + 90, 1);
 
-  mqttclient.setServer(server, 1883);
-  mqttclient.setCallback(callback);
-  delay(5000);
-
   backLight.setBrightness(20);
    
   Serial.println("SHT31 test");
@@ -124,6 +123,26 @@ void setup() {
   Serial.print("Measurement Interval: "); 
   Serial.print(scd30.getMeasurementInterval()); 
   Serial.println(" seconds");
+
+  if (!SD.begin(SDCARD_SS_PIN, SDCARD_SPI)) {
+    Serial.println("SD card initialization failed!");
+    while (1);
+  }
+  
+  file_serveraddr = SD.open("serveraddr.txt", FILE_READ);
+  if (file_serveraddr) {
+    Serial.println("serveraddr.txt:");
+    while (file_serveraddr.available()) {
+      server += file_serveraddr.read();
+    }
+    file_serveraddr.close();
+  } else {
+    Serial.println("error opening serveraddr.txt");
+  }
+
+  mqttclient.setServer(server.c_str(), 1883);
+  mqttclient.setCallback(callback);
+  delay(5000);
 
   connect_to_wifi();
 }
