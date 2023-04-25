@@ -13,7 +13,6 @@
 #include <Seeed_FS.h>
 #include "SD/Seeed_SD.h"
 #include <string>
-#include "arduino_secrets.h"
 #include "lcd_backlight.hpp"
 #include <TFT_eSPI.h>
 #include <Wire.h>
@@ -22,8 +21,8 @@ TFT_eSPI tft;
 TFT_eSprite spr = TFT_eSprite(&tft);  //sprite
 static LCDBackLight backLight;
 
-File file_serveraddr;
-std::string server;
+File file_serveraddr, file_wifi_ssid, file_wifi_pass;
+std::string server, ssid, pass;
 
 Adafruit_SCD30  scd30;
 unsigned int co2;
@@ -131,13 +130,32 @@ void setup() {
   
   file_serveraddr = SD.open("serveraddr.txt", FILE_READ);
   if (file_serveraddr) {
-    Serial.println("serveraddr.txt:");
     while (file_serveraddr.available()) {
       server += file_serveraddr.read();
     }
     file_serveraddr.close();
   } else {
     Serial.println("error opening serveraddr.txt");
+  }
+
+  file_wifi_ssid = SD.open("wifi_ssid.txt", FILE_READ);
+  if (file_wifi_ssid) {
+    while (file_wifi_ssid.available()) {
+      ssid += file_wifi_ssid.read();
+    }
+    file_wifi_ssid.close();
+  } else {
+    Serial.println("error opening wifi_ssid.txt");
+  }
+
+  file_wifi_pass = SD.open("wifi_pass.txt", FILE_READ);
+  if (file_wifi_pass) {
+    while (file_wifi_pass.available()) {
+      pass += file_wifi_pass.read();
+    }
+    file_wifi_pass.close();
+  } else {
+    Serial.println("error opening wifi_pass.txt");
   }
 
   mqttclient.setServer(server.c_str(), 1883);

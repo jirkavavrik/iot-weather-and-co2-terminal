@@ -4,9 +4,9 @@ void connect_to_wifi() {
   while (status != WL_CONNECTED && i < 3) {
     #ifdef DEBUGSERIAL
     Serial.print("[WiFi] Connecting to: ");
-    Serial.println(ssid);
+    Serial.println(ssid.c_str());
     #endif
-    status = WiFi.begin(ssid, password);
+    status = WiFi.begin(ssid.c_str(), pass.c_str());
     delay(10000);
     i++;
   }
@@ -18,7 +18,7 @@ void connect_to_wifi() {
 void reconnect_wifi() {
   int status = WL_IDLE_STATUS;
   //WiFi.end();
-  status = WiFi.begin(ssid, password);
+  status = WiFi.begin(ssid.c_str(), pass.c_str());
    if (WiFi.status() == WL_NO_SHIELD) {
     #ifdef DEBUGSERIAL
     Serial.println("Communication with WiFi module failed!");
@@ -31,9 +31,9 @@ void reconnect_wifi() {
   while (status != WL_CONNECTED && i < 3) {
     #ifdef DEBUGSERIAL
     Serial.print("[WiFi] Reconnecting to: ");
-    Serial.println(ssid);
+    Serial.println(ssid.c_str());
     #endif
-    status = WiFi.begin(ssid, password);
+    status = WiFi.begin(ssid.c_str(), pass.c_str());
     delay(10000);
     i++;
   }
