@@ -21,8 +21,9 @@ TFT_eSPI tft;
 TFT_eSprite spr = TFT_eSprite(&tft);  //sprite
 static LCDBackLight backLight;
 
-File file_serveraddr, file_wifi_ssid, file_wifi_pass;
-std::string server, ssid, pass;
+File file_serveraddr, file_wifi_ssid, file_wifi_pass, file_topic_time, file_topic_temperature, file_topic_humidity, file_topic_pressure, file_mqtt_port;
+std::string server, ssid, pass, topic_time, topic_temperature, topic_humidity, topic_pressure, mqtt_port_str;
+int mqtt_port;
 
 Adafruit_SCD30  scd30;
 unsigned int co2;
@@ -158,7 +159,58 @@ void setup() {
     Serial.println("error opening wifi_pass.txt");
   }
 
-  mqttclient.setServer(server.c_str(), 1883);
+  file_mqtt_port = SD.open("mqtt_port.txt", FILE_READ);
+  if (file_mqtt_port) {
+    while (file_mqtt_port.available()) {
+      mqtt_port_str += file_mqtt_port.read();
+    }
+    file_mqtt_port.close();
+    mqtt_port = std::stoi(mqtt_port_str,nullptr,10);
+  } else {
+    Serial.println("error opening mqtt_port.txt");
+  }
+
+  file_topic_time = SD.open("topic_time.txt", FILE_READ);
+  if (file_topic_time) {
+    while (file_topic_time.available()) {
+      topic_time += file_topic_time.read();
+    }
+    file_topic_time.close();
+  } else {
+    Serial.println("error opening topic_time.txt");
+  }
+
+  file_topic_temperature = SD.open("topic_temperature.txt", FILE_READ);
+  if (file_topic_temperature) {
+    while (file_topic_temperature.available()) {
+      topic_temperature += file_topic_temperature.read();
+    }
+    file_topic_temperature.close();
+  } else {
+    Serial.println("error opening topic_temperature.txt");
+  }
+
+  file_topic_humidity = SD.open("topic_humidity.txt", FILE_READ);
+  if (file_topic_humidity) {
+    while (file_topic_humidity.available()) {
+      topic_humidity += file_topic_humidity.read();
+    }
+    file_topic_humidity.close();
+  } else {
+    Serial.println("error opening topic_humidity.txt");
+  }
+
+  file_topic_pressure = SD.open("topic_pressure.txt", FILE_READ);
+  if (file_topic_pressure) {
+    while (file_topic_pressure.available()) {
+      topic_pressure += file_topic_pressure.read();
+    }
+    file_topic_pressure.close();
+  } else {
+    Serial.println("error opening topic_pressure.txt");
+  }
+
+  mqttclient.setServer(server.c_str(), mqtt_port);
   mqttclient.setCallback(callback);
   delay(5000);
 

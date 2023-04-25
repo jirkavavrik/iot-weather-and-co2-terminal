@@ -59,22 +59,22 @@ void callback(char* topic, byte* payload, unsigned int length) {
     Serial.print((char)payload[i]);
   }
   Serial.println();
-  if(strcmp(topic, "cas") == 0) {
+  if(strcmp(topic, topic_time.c_str()) == 0) {
     memset(cas,0,sizeof(cas));
     for (int i=0;i<length;i++) {
       cas[i] = (char)payload[i];
     }
-  } else if(strcmp(topic, "meteostanice/teplota") == 0) {
+  } else if(strcmp(topic, topic_temperature.c_str()) == 0) {
     memset(ext_temp,0,sizeof(ext_temp));
     for (int i=0;i<length;i++) {
       ext_temp[i] = (char)payload[i];
     }
-  } else if(strcmp(topic, "meteostanice/vlhkost") == 0) {
+  } else if(strcmp(topic, topic_humidity.c_str()) == 0) {
     memset(ext_humidity,0,sizeof(ext_humidity));
     for (int i=0;i<length;i++) {
       ext_humidity[i] = (char)payload[i];
     }
-  } else if(strcmp(topic, "meteostanice/tlak") == 0) {
+  } else if(strcmp(topic, topic_pressure.c_str()) == 0) {
     memset(ext_pressure,0,sizeof(ext_pressure));
     for (int i=0;i<length;i++) {
       ext_pressure[i] = (char)payload[i];
@@ -88,10 +88,10 @@ void reconnect_mqtt() {
     Serial.print("Attempting MQTT connection...");
     if (mqttclient.connect("wioterminal")) {
       Serial.println("connected");
-      mqttclient.subscribe("cas"); //time
-      mqttclient.subscribe("meteostanice/teplota"); //temperature
-      mqttclient.subscribe("meteostanice/vlhkost"); //humidity
-      mqttclient.subscribe("meteostanice/tlak"); //atm. pressure
+      mqttclient.subscribe(topic_time.c_str());
+      mqttclient.subscribe(topic_temperature.c_str());
+      mqttclient.subscribe(topic_humidity.c_str());
+      mqttclient.subscribe(topic_pressure.c_str());
     } else {
       Serial.print("failed, rc=");
       Serial.print(mqttclient.state());
