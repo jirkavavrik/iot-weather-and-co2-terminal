@@ -1,20 +1,3 @@
-void connect_to_wifi() {
-  int status = WL_IDLE_STATUS;
-  int i = 0;
-  while (status != WL_CONNECTED && i < 3) {
-    #ifdef DEBUGSERIAL
-    Serial.print("[WiFi] Connecting to: ");
-    Serial.println(ssid.c_str());
-    #endif
-    status = WiFi.begin(ssid.c_str(), pass.c_str());
-    delay(10000);
-    i++;
-  }
-  #ifdef DEBUGSERIAL
-  Serial.println("[WiFi] Connected");
-  #endif
-}
-
 void reconnect_wifi() {
   int status = WL_IDLE_STATUS;
   //WiFi.end();

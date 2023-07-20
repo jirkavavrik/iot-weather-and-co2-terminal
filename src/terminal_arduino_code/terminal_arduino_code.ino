@@ -214,7 +214,8 @@ void setup() {
   mqttclient.setCallback(callback);
   delay(5000);
 
-  connect_to_wifi();
+  WiFi.begin(ssid.c_str(), pass.c_str()); //quick wifi connect attempt
+  //connect_to_wifi();
 }
 
 void loop() {
@@ -276,6 +277,11 @@ void loop() {
   spr.drawNumber(co2, 0, 0, 1);
   spr.pushSprite((tft.width() / 2) - 1, (tft.height() / 2) + 67);
   spr.deleteSprite();
+
+  if(WiFi.status() != WL_CONNECTED) {
+      digitalWrite(LED_BUILTIN, HIGH);
+      reconnect_wifi();
+  }
 
   if (!mqttclient.connected()) {
     reconnect_mqtt();
