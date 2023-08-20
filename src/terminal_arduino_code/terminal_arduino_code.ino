@@ -24,6 +24,7 @@ static LCDBackLight backLight;
 File file_serveraddr, file_wifi_ssid, file_wifi_pass, file_topic_time, file_topic_temperature, file_topic_humidity, file_topic_pressure, file_mqtt_port;
 std::string server, ssid, pass, topic_time, topic_temperature, topic_humidity, topic_pressure, mqtt_port_str;
 int mqtt_port;
+int brightness = 10;
 
 Adafruit_SCD30  scd30;
 unsigned int co2;
@@ -37,8 +38,18 @@ void connect_to_wifi();
 void reconnect_wifi();
 void callback(char*, byte*, unsigned int);
 void reconnect_mqtt();
+void buttonA();
+void buttonB();
+void buttonC();
 
 void setup() {
+  pinMode(WIO_KEY_A, INPUT_PULLUP);
+  pinMode(WIO_KEY_B, INPUT_PULLUP);
+  pinMode(WIO_KEY_C, INPUT_PULLUP);
+
+  attachInterrupt(digitalPinToInterrupt(WIO_KEY_A), buttonA, FALLING);
+  attachInterrupt(digitalPinToInterrupt(WIO_KEY_B), buttonB, FALLING);
+  attachInterrupt(digitalPinToInterrupt(WIO_KEY_C), buttonC, FALLING);
   Serial.begin(115200);
   tft.begin();
   tft.setRotation(3);
@@ -95,7 +106,7 @@ void setup() {
   tft.setTextColor(TFT_GREEN);
   //tft.drawString("ppm", ((tft.width() / 2) + (tft.width() / 2) / 2) + 30 , (tft.height() / 2) + 90, 1);
 
-  backLight.setBrightness(20);
+  backLight.setBrightness(brightness);
    
   Serial.println("SHT31 test");
   if (!sht.begin(0x44)) {   // Set to 0x45 for alternate i2c addr

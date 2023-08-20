@@ -85,3 +85,19 @@ void reconnect_mqtt() {
     i++;
   }
 }
+
+void buttonA() {
+
+}
+void buttonB() {
+  if(brightness <= 90) {
+    brightness += 10;
+    backLight.setBrightness(brightness);
+  }
+}
+void buttonC() {
+  if(brightness >= 10) {
+    brightness -= 10;
+    backLight.setBrightness(brightness);
+  }
+}
