@@ -25,6 +25,7 @@ File file_serveraddr, file_wifi_ssid, file_wifi_pass, file_topic_time, file_topi
 std::string server, ssid, pass, topic_time, topic_temperature, topic_humidity, topic_pressure, mqtt_port_str;
 int mqtt_port;
 int brightness = 10;
+int last_brightness_change = 0;
 
 Adafruit_SCD30  scd30;
 unsigned int co2;

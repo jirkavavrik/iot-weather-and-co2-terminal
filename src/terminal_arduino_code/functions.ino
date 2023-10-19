@@ -90,14 +90,16 @@ void buttonA() {
 
 }
 void buttonB() {
-  if(brightness <= 90) {
+  if(brightness <= 90 && millis() - last_brightness_change > 300) {
     brightness += 10;
     backLight.setBrightness(brightness);
+    last_brightness_change = millis();
   }
 }
 void buttonC() {
-  if(brightness >= 10) {
+  if(brightness >= 10 && millis() - last_brightness_change > 300) {
     brightness -= 10;
     backLight.setBrightness(brightness);
+    last_brightness_change = millis();
   }
 }
