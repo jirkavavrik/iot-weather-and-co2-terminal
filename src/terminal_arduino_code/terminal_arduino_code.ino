@@ -19,7 +19,7 @@
 #include <Adafruit_NeoPixel.h>
 #include <FastLED.h>
 
-#define NUM_LEDS 1
+#define NUM_LEDS 3
 CRGB leds[NUM_LEDS];
 
 TFT_eSPI tft;

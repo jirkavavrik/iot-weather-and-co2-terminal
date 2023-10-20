@@ -88,20 +88,28 @@ void reconnect_mqtt() {
 
 void rgb_indicate(int ppm) {
   if(ppm < 1000) {
-    leds[0] = 0x880000;
+    for(int i = 0;i<3;i++) {
+      leds[i] = 0x880000;
+    }
     FastLED.show();
   } else if (ppm >= 1000 && ppm < 2000) {
-    leds[0] = 0x444400;
+    for(int i = 0;i<3;i++) {
+      leds[i] = 0x444400;
+    }
     FastLED.show();
   } else {
-    leds[0] = 0x008800;
+    for(int i = 0;i<3;i++) {
+      leds[i] = 0x008800;
+    }
     FastLED.show();
   }
 }
 
 void buttonA() {
  if (rgb_indication) {
-    leds[0] = 0x000000;
+    for(int i = 0;i<3;i++) {
+      leds[i] = 0x000000;
+    }
     FastLED.show();
     rgb_indication = 0;
  } else {
