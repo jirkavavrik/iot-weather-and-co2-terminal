@@ -16,6 +16,11 @@
 #include "lcd_backlight.hpp"
 #include <TFT_eSPI.h>
 #include <Wire.h>
+#include <Adafruit_NeoPixel.h>
+#include <FastLED.h>
+
+#define NUM_LEDS 1
+CRGB leds[NUM_LEDS];
 
 TFT_eSPI tft;
 TFT_eSprite spr = TFT_eSprite(&tft);  //sprite
@@ -26,6 +31,7 @@ std::string server, ssid, pass, topic_time, topic_temperature, topic_humidity, t
 int mqtt_port;
 int brightness = 10;
 int last_brightness_change = 0;
+int rgb_indication = 1;
 
 Adafruit_SCD30  scd30;
 unsigned int co2;
@@ -52,6 +58,7 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(WIO_KEY_B), buttonB, FALLING);
   attachInterrupt(digitalPinToInterrupt(WIO_KEY_C), buttonC, FALLING);
   Serial.begin(115200);
+  FastLED.addLeds<SK6812, 1, RGB>(leds, NUM_LEDS);  // GRB order
   tft.begin();
   tft.setRotation(3);
   backLight.initialize();
@@ -240,6 +247,9 @@ void loop() {
     Serial.print(scd30.CO2, 3);
     Serial.println(" ppm");
     Serial.println("");
+    if(rgb_indication){
+      rgb_indicate(scd30.CO2);
+    }
   } else {
     Serial.println("No data");
   }
