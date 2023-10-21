@@ -256,7 +256,7 @@ void loop() {
   
   float t = sht.readTemperature();
   float h = sht.readHumidity();
-  int co2 = scd30.CO2;
+  co2 = scd30.CO2;
 
   if (! isnan(t)) {  // check if 'is not a number'
     Serial.print("Temp *C = "); Serial.print(t); Serial.print("\t\t");
