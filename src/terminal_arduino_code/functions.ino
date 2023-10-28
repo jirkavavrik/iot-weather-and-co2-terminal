@@ -33,7 +33,7 @@ void reconnect_wifi() {
   }
 }
 
-//receive mqtt messages
+/*receive mqtt messages*/
 void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message arrived [");
   Serial.print(topic);
@@ -42,6 +42,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     Serial.print((char)payload[i]);
   }
   Serial.println();
+  /*filter messages by topics and save to correct variables*/
   if(strcmp(topic, topic_time.c_str()) == 0) {
     memset(cas,0,sizeof(cas));
     for (int i=0;i<length;i++) {
@@ -71,6 +72,7 @@ void reconnect_mqtt() {
     Serial.print("Attempting MQTT connection...");
     if (mqttclient.connect("wioterminal")) {
       Serial.println("connected");
+      /*(re)subscribe*/
       mqttclient.subscribe(topic_time.c_str());
       mqttclient.subscribe(topic_temperature.c_str());
       mqttclient.subscribe(topic_humidity.c_str());
@@ -86,25 +88,27 @@ void reconnect_mqtt() {
   }
 }
 
+/*depending on CO2 level, light RGB with different colours*/
 void rgb_indicate(int ppm) {
   if(ppm < 1000) {
     for(int i = 0;i<3;i++) {
-      leds[i] = 0x880000;
+      leds[i] = 0x880000; /*green*/
     }
     FastLED.show();
   } else if (ppm >= 1000 && ppm < 2000) {
     for(int i = 0;i<3;i++) {
-      leds[i] = 0x444400;
+      leds[i] = 0x444400;/*yellow*/
     }
     FastLED.show();
   } else {
     for(int i = 0;i<3;i++) {
-      leds[i] = 0x008800;
+      leds[i] = 0x008800; /*red*/
     }
     FastLED.show();
   }
 }
 
+/*button A (on the right) - toggle RGB LED indication*/
 void buttonA() {
  if (rgb_indication) {
     for(int i = 0;i<3;i++) {
@@ -118,6 +122,7 @@ void buttonA() {
  }
 }
 
+/*button B (middle) - increase LCD brightness*/
 void buttonB() {
   if(brightness <= 90 && millis() - last_brightness_change > 300) {
     brightness += 10;
@@ -125,6 +130,8 @@ void buttonB() {
     last_brightness_change = millis();
   }
 }
+
+/*button B (on the left) - decrease LCD brightness*/
 void buttonC() {
   if(brightness >= 10 && millis() - last_brightness_change > 300) {
     brightness -= 10;

@@ -16,7 +16,6 @@
 #include "lcd_backlight.hpp"
 #include <TFT_eSPI.h>
 #include <Wire.h>
-#include <Adafruit_NeoPixel.h>
 #include <FastLED.h>
 
 #define NUM_LEDS 3
@@ -29,6 +28,7 @@ static LCDBackLight backLight;
 File file_serveraddr, file_wifi_ssid, file_wifi_pass, file_topic_time, file_topic_temperature, file_topic_humidity, file_topic_pressure, file_mqtt_port;
 std::string server, ssid, pass, topic_time, topic_temperature, topic_humidity, topic_pressure, mqtt_port_str;
 int mqtt_port;
+
 int brightness = 10;
 int last_brightness_change = 0;
 int rgb_indication = 1;
@@ -50,19 +50,21 @@ void buttonB();
 void buttonC();
 
 void setup() {
+  /*configure buttons interrupts*/
   pinMode(WIO_KEY_A, INPUT_PULLUP);
   pinMode(WIO_KEY_B, INPUT_PULLUP);
   pinMode(WIO_KEY_C, INPUT_PULLUP);
-
   attachInterrupt(digitalPinToInterrupt(WIO_KEY_A), buttonA, FALLING);
   attachInterrupt(digitalPinToInterrupt(WIO_KEY_B), buttonB, FALLING);
   attachInterrupt(digitalPinToInterrupt(WIO_KEY_C), buttonC, FALLING);
+
   Serial.begin(115200);
-  FastLED.addLeds<SK6812, 1, RGB>(leds, NUM_LEDS);  // GRB order
+  FastLED.addLeds<SK6812, 1, RGB>(leds, NUM_LEDS);  /*configure the SH8612 RGB module - there is GRB order of colours*/
   tft.begin();
   tft.setRotation(3);
   backLight.initialize();
 
+  /*draw the static shapes on LCD*/
   //Header
   tft.fillScreen(TFT_BLACK);
   tft.setFreeFont(&FreeSansBoldOblique18pt7b);
@@ -74,14 +76,12 @@ void setup() {
     tft.drawLine(0, 50 + line_index, tft.width(), 50 + line_index, TFT_GREEN);
   }
   //temperature & humidity rectangle
-  tft.drawRoundRect(5, 60, (tft.width() / 2) - 20 , tft.height() - 65 , 10, TFT_WHITE); // L1
-
+  tft.drawRoundRect(5, 60, (tft.width() / 2) - 20 , tft.height() - 65 , 10, TFT_WHITE);
   tft.setFreeFont(&FreeSansBoldOblique12pt7b);
   tft.setTextColor(TFT_RED);
   tft.drawString("Teplota", 7 , 65 , 1);
   tft.setTextColor(TFT_GREEN);
   tft.drawString("st. C", 80, 108, 1);
-
   tft.setFreeFont(&FreeSansBoldOblique12pt7b);
   tft.setTextColor(TFT_RED);
   tft.drawString("Vlhkost", 7 , 150 , 1);
@@ -90,51 +90,49 @@ void setup() {
 
   //outside weather rectangle
   tft.drawRoundRect((tft.width() / 2) - 10  , 60, (tft.width() / 2) +5, (tft.height() - 65) / 2, 10, TFT_BLUE); // s1
-
   tft.setFreeFont(&FreeSansBoldOblique9pt7b);
   tft.setTextColor(TFT_RED) ;
   tft.drawString("Venku je:", (tft.width() / 2) - 1  , 70 , 1); // Print the test text in the custom font
 
   //co2 rectangle
   tft.drawRoundRect((tft.width() / 2) - 10 , (tft.height() / 2) + 30, (tft.width() / 2) / 2 , (tft.height() - 65) / 2 , 10, TFT_WHITE); // s3
-
   tft.setFreeFont(&FreeSansBoldOblique9pt7b);
   tft.setTextColor(TFT_RED) ;
   tft.drawString("CO2", (tft.width() / 2) - 1 , (tft.height() / 2) + 40 , 1); // Print the test text in the custom font
   tft.setTextColor(TFT_GREEN);
   tft.drawString("ppm", (tft.width() / 2) + 30, (tft.height() / 2) + 90, 1);
 
-
   //time rectangle
   tft.drawRoundRect(((tft.width() / 2) + (tft.width() / 2) / 2) - 5  , (tft.height() / 2) + 30, (tft.width() / 2) / 2 , (tft.height() - 65) / 2 , 10, TFT_BLUE); // s4
-
   tft.setFreeFont(&FreeSansBoldOblique9pt7b);
   tft.setTextColor(TFT_RED) ;
   tft.drawString("Cas:", ((tft.width() / 2) + (tft.width() / 2) / 2)   , (tft.height() / 2) + 40 , 1); // Print the test text in the custom font
   tft.setTextColor(TFT_GREEN);
-  //tft.drawString("ppm", ((tft.width() / 2) + (tft.width() / 2) / 2) + 30 , (tft.height() / 2) + 90, 1);
 
   backLight.setBrightness(brightness);
-   
+  
+  /*init the temp & humidity SHT31 sensor*/
   Serial.println("SHT31 test");
   if (!sht.begin(0x44)) {   // Set to 0x45 for alternate i2c addr
     Serial.println("Couldn't find SHT31");
     while (1) delay(1);
   }
 
+  /*make sure to disable SHT31's heater*/
   Serial.print("Heater Enabled State: ");
   if (sht.isHeaterEnabled())
     Serial.println("ENABLED");
   else
     Serial.println("DISABLED");
 
-  // Try to initialize
+/*Try to initialize SCD30 CO2 sensor*/
   if (!scd30.begin()) {
     Serial.println("Failed to find SCD30 chip");
     //while (1) { delay(10); }
   }
   Serial.println("SCD30 Found!");
 
+  /*set SCD30 measurement interval*/
   if (!scd30.setMeasurementInterval(30)){
     Serial.println("Failed to set measurement interval");
     /*while(1){ delay(10);}*/
@@ -143,6 +141,7 @@ void setup() {
   Serial.print(scd30.getMeasurementInterval()); 
   Serial.println(" seconds");
 
+  /*initialize SD card and read all required parameters from it*/
   if (!SD.begin(SDCARD_SS_PIN, SDCARD_SPI)) {
     Serial.println("SD card initialization failed!");
     while (1);
@@ -229,6 +228,7 @@ void setup() {
     Serial.println("error opening topic_pressure.txt");
   }
 
+  /*configure MQTT*/
   mqttclient.setServer(server.c_str(), mqtt_port);
   mqttclient.setCallback(callback);
   delay(5000);
@@ -238,15 +238,21 @@ void setup() {
 }
 
 void loop() {
-  char text_line1[18], text_line2[12];
+  char text_line1[18], text_line2[12];/*first and second line of text zo be drawn to the "outside weather" part of the display*/
+
+  /*check if SCD30 has made a measurement*/
   if (scd30.dataReady()){
     Serial.println("Data available!");
-    if (!scd30.read()){ Serial.println("Error reading sensor data"); return; }
+    if (!scd30.read()){
+      Serial.println("Error reading sensor data");
+      return;
+    }
     
     Serial.print("CO2: ");
     Serial.print(scd30.CO2, 3);
     Serial.println(" ppm");
     Serial.println("");
+    /*if enabled, light RGB LED according to CO2 level*/
     if(rgb_indication){
       rgb_indicate(scd30.CO2);
     }
@@ -272,16 +278,15 @@ void loop() {
 
   delay(1000);
 
+  /*draw measurements to the LCD*/
   //inside temperature
   spr.createSprite(65, 30);
   spr.fillSprite(TFT_BLACK);
   spr.setFreeFont(&FreeSansBoldOblique12pt7b);
   spr.setTextColor(TFT_WHITE);
-  //spr.drawNumber(t, 0, 0, 1);
   spr.drawFloat(t,2, 0, 0, 1);
   spr.pushSprite(15, 100);
   spr.deleteSprite();
-
   //inside humidity
   spr.createSprite(65, 30);
   spr.setFreeFont(&FreeSansBoldOblique12pt7b);
@@ -291,7 +296,6 @@ void loop() {
   spr.setTextColor(TFT_GREEN);
   spr.pushSprite(15, 185);
   spr.deleteSprite();
-
   //co2
   spr.createSprite(60, 30);
   spr.setFreeFont(&FreeSansBoldOblique12pt7b);
@@ -300,6 +304,7 @@ void loop() {
   spr.pushSprite((tft.width() / 2) - 1, (tft.height() / 2) + 67);
   spr.deleteSprite();
 
+  /*check WiFi connectivity*/
   if(WiFi.status() != WL_CONNECTED) {
       digitalWrite(LED_BUILTIN, HIGH);
       reconnect_wifi();
@@ -308,13 +313,12 @@ void loop() {
   if (!mqttclient.connected()) {
     reconnect_mqtt();
   }
-  mqttclient.loop(); //dokumentace: This should be called regularly to allow the client to process incoming messages and maintain its connection to the server.
+  mqttclient.loop(); //documentation: This should be called regularly to allow the client to process incoming messages and maintain its connection to the server.
   
-  //weather outside
-  spr.createSprite(145, 46);//spr.createSprite(30, 30);
+  /*display outside conditions to the LCD*/
+  spr.createSprite(145, 46);
   spr.setFreeFont(&FreeSansBoldOblique9pt7b);
   spr.setTextColor(TFT_WHITE);
-  //spr.drawNumber(t, 0, 0, 1);
   sprintf(text_line1,"%s%s%s%s", ext_temp, " C, ", ext_humidity, " %");
   sprintf(text_line2,"%s%s", ext_pressure, " hPa");
   Serial.print("text line 1: ");
@@ -327,7 +331,7 @@ void loop() {
   spr.pushSprite((tft.width() / 2) - 1, 100);
   spr.deleteSprite();
 
-  //time
+  /*draw current time to the LCD (time is received by MQTT)*/
   Serial.print("promenna cas: ");Serial.println(cas);
   spr.createSprite(65, 30);
   spr.setFreeFont(&FreeSansBoldOblique12pt7b);
