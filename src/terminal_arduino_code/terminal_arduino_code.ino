@@ -144,7 +144,7 @@ void setup() {
   /*initialize SD card and read all required parameters from it*/
   if (!SD.begin(SDCARD_SS_PIN, SDCARD_SPI)) {
     Serial.println("SD card initialization failed!");
-    while (1);
+    /*while (1);*/
   }
   
   file_serveraddr = SD.open("serveraddr.txt", FILE_READ);
