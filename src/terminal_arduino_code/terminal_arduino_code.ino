@@ -32,6 +32,8 @@ int mqtt_port;
 int brightness = 10;
 int last_brightness_change = 0;
 int rgb_indication = 1;
+int wifi_disable = 0;
+int mqtt_disable = 0;
 
 Adafruit_SCD30  scd30;
 unsigned int co2;
@@ -48,6 +50,7 @@ void reconnect_mqtt();
 void buttonA();
 void buttonB();
 void buttonC();
+void rgb_indicate(int);
 
 void setup() {
   /*configure buttons interrupts*/
@@ -229,12 +232,21 @@ void setup() {
   }
 
   /*configure MQTT*/
-  mqttclient.setServer(server.c_str(), mqtt_port);
-  mqttclient.setCallback(callback);
-  delay(5000);
+  if(!server.empty() && !mqtt_port_str.empty()) {
+    mqttclient.setServer(server.c_str(), mqtt_port);
+    mqttclient.setCallback(callback);
+    delay(5000);
+  } else {
+    mqtt_disable = 1; /*mqtt communication will be turned off*/
+    Serial.println("MQTT server address or port could nto be read from SD. MQTT communication will be turned off.");
+  }
 
-  WiFi.begin(ssid.c_str(), pass.c_str()); //quick wifi connect attempt
-  //connect_to_wifi();
+  if(!ssid.empty() && !pass.empty()) {
+    WiFi.begin(ssid.c_str(), pass.c_str()); //quick wifi connect attempt
+  } else {
+    wifi_disable = 1;
+    Serial.println("Wi-Fi SSID or password could nto be read from SD. Wi-Fi communication will be turned off.");
+  }
 }
 
 void loop() {
@@ -305,15 +317,19 @@ void loop() {
   spr.deleteSprite();
 
   /*check WiFi connectivity*/
-  if(WiFi.status() != WL_CONNECTED) {
+  if(!wifi_disable) {
+    if(WiFi.status() != WL_CONNECTED) {
       digitalWrite(LED_BUILTIN, HIGH);
       reconnect_wifi();
+    }
   }
 
-  if (!mqttclient.connected()) {
-    reconnect_mqtt();
+  if(!mqtt_disable) {
+    if (!mqttclient.connected()) {
+      reconnect_mqtt();
+    }
+    mqttclient.loop(); //documentation: This should be called regularly to allow the client to process incoming messages and maintain its connection to the server.
   }
-  mqttclient.loop(); //documentation: This should be called regularly to allow the client to process incoming messages and maintain its connection to the server.
   
   /*display outside conditions to the LCD*/
   spr.createSprite(145, 46);
