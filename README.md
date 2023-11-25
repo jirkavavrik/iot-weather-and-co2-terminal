@@ -21,4 +21,6 @@ The files that need to be present on the microSD card and their contents are:
 * _topic_pressure.txt_ - MQTT topic the device will subscribe to in order to get atmospheric pressure info
 * _topic_time.txt_ - MQTT topic the device will subscribe to in order to get current time (as a string)
 
-![Photo of the terminal](doc/photo1.jpg "Photo of the terminal")
+![Photo of the terminal - front side](doc/photo1.jpg "Photo of the terminal - front side")
+![Photo of the terminal - back side](doc/photo2.jpg "Photo of the terminal - back side")
+![Photo of the CO2 sensor SCD30 in its 3D pronted case](doc/photo3.jpg "Photo of the CO2 sensor SCD30 in its 3D pronted case")
