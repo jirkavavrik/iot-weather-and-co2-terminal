@@ -2,7 +2,7 @@
    IoT weather and CO2 terminal 
    Jiří Vavřík
    Derived from project by: Salman Faris
-   Date: 28/01/2023
+   Date: 26/11/2023
 */
 #define DEBUGSERIAL
 #include <Adafruit_SHT31.h>
@@ -34,6 +34,7 @@ int last_brightness_change = 0;
 int rgb_indication = 1;
 int wifi_disable = 0;
 int mqtt_disable = 0;
+int scd30_fully_ready = 0;
 
 Adafruit_SCD30  scd30;
 unsigned int co2;
@@ -62,6 +63,7 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(WIO_KEY_C), buttonC, FALLING);
 
   Serial.begin(115200);
+  Serial.println("Starting...");
   FastLED.addLeds<SK6812, 1, RGB>(leds, NUM_LEDS);  /*configure the SH8612 RGB module - there is GRB order of colours*/
   tft.begin();
   tft.setRotation(3);
@@ -128,21 +130,12 @@ void setup() {
   else
     Serial.println("DISABLED");
 
-/*Try to initialize SCD30 CO2 sensor*/
-  if (!scd30.begin()) {
+  /*Try to initialize SCD30 CO2 sensor*/
+  if (!scd30.begin()) { /*begin function also calls _init() that starts continuous measurement and sets interval to 2 s*/
     Serial.println("Failed to find SCD30 chip");
     //while (1) { delay(10); }
   }
   Serial.println("SCD30 Found!");
-
-  /*set SCD30 measurement interval*/
-  if (!scd30.setMeasurementInterval(30)){
-    Serial.println("Failed to set measurement interval");
-    /*while(1){ delay(10);}*/
-  }
-  Serial.print("Measurement Interval: "); 
-  Serial.print(scd30.getMeasurementInterval()); 
-  Serial.println(" seconds");
 
   /*initialize SD card and read all required parameters from it*/
   if (!SD.begin(SDCARD_SS_PIN, SDCARD_SPI)) {
@@ -259,14 +252,14 @@ void loop() {
       Serial.println("Error reading sensor data");
       return;
     }
-    
+    co2 = scd30.CO2;
     Serial.print("CO2: ");
-    Serial.print(scd30.CO2, 3);
+    Serial.print(co2, 3);
     Serial.println(" ppm");
     Serial.println("");
     /*if enabled, light RGB LED according to CO2 level*/
-    if(rgb_indication){
-      rgb_indicate(scd30.CO2);
+    if(rgb_indication && co2){
+      rgb_indicate(co2);
     }
   } else {
     Serial.println("No data");
@@ -274,7 +267,17 @@ void loop() {
   
   float t = sht.readTemperature();
   float h = sht.readHumidity();
-  co2 = scd30.CO2;
+  
+  /*because first reading from SCD30 gives co2 value of zero, we wait for first nonzero reading before setting the interval from 2 to desired higher value*/
+  if(!scd30_fully_ready) {
+    if(co2) {
+      if (!scd30.setMeasurementInterval(30)){
+        Serial.println("Failed to set measurement interval");
+      } else {
+        scd30_fully_ready = 1;
+      }
+    }
+  }
 
   if (! isnan(t)) {  // check if 'is not a number'
     Serial.print("Temp *C = "); Serial.print(t); Serial.print("\t\t");
