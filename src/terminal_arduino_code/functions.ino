@@ -91,30 +91,30 @@ void reconnect_mqtt() {
 /*depending on CO2 level, light RGB with different colours*/
 void rgb_indicate(int ppm) {
   if(ppm < 1000) {
-    for(int i = 0;i<3;i++) {
-      leds[i] = 0x880000; /*green*/
+    for(int i = 0;i<LED_COUNT;i++) {
+      RGBLED.setPixelColor(i, 0,127,0);
     }
-    FastLED.show();
+    RGBLED.show();
   } else if (ppm >= 1000 && ppm < 2000) {
-    for(int i = 0;i<3;i++) {
-      leds[i] = 0x444400;/*yellow*/
+    for(int i = 0;i<LED_COUNT;i++) {
+      RGBLED.setPixelColor(i, 127,127,0);
     }
-    FastLED.show();
+    RGBLED.show();
   } else {
-    for(int i = 0;i<3;i++) {
-      leds[i] = 0x008800; /*red*/
+    for(int i = 0;i<LED_COUNT;i++) {
+      RGBLED.setPixelColor(i, 127,0,0);
     }
-    FastLED.show();
+    RGBLED.show();
   }
 }
 
 /*button A (on the right) - toggle RGB LED indication*/
 void buttonA() {
  if (rgb_indication) {
-    for(int i = 0;i<3;i++) {
-      leds[i] = 0x000000;
+    for(int i = 0;i<LED_COUNT;i++) {
+      RGBLED.setPixelColor(i,0,0,0);
     }
-    FastLED.show();
+    RGBLED.show();
     rgb_indication = 0;
  } else {
     rgb_indicate(co2);

@@ -15,11 +15,10 @@
 #include <string>
 #include "lcd_backlight.hpp"
 #include <TFT_eSPI.h>
-#include <Wire.h>
-#include <FastLED.h>
-
-#define NUM_LEDS 3
-CRGB leds[NUM_LEDS];
+#include <Adafruit_NeoPixel.h>
+#define LED_PIN 1
+#define LED_COUNT 3
+Adafruit_NeoPixel RGBLED = Adafruit_NeoPixel(LED_COUNT, LED_PIN, NEO_GRB);
 
 TFT_eSPI tft;
 TFT_eSprite spr = TFT_eSprite(&tft);  //sprite
@@ -64,7 +63,9 @@ void setup() {
 
   Serial.begin(115200);
   Serial.println("Starting...");
-  FastLED.addLeds<SK6812, 1, RGB>(leds, NUM_LEDS);  /*configure the SH8612 RGB module - there is GRB order of colours*/
+  RGBLED.begin();
+  RGBLED.show(); // Initialize all pixels to 'off'
+
   tft.begin();
   tft.setRotation(3);
   backLight.initialize();
